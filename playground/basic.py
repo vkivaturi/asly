@@ -29,3 +29,39 @@ endpoint = os.getenv('BASE_URL')
 # Retrieve the Model
 model_name=os.getenv('MODEL')
 
+chat = ChatOpenAI(api_key=api_key, base_url=endpoint, model=model_name)
+
+# Set maximum token limit for the chat model
+chat.max_tokens = 512
+
+# Configure model-specific parameters
+chat.model_kwargs = {"top_p": 0.8, "frequency_penalty": 0.0, "presence_penalty": 0.0, "stop":["<|eot_id|>","<|im_start|>","<|im_end|>"]}
+
+# Define a chat prompt template with pre-defined system and human messages
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are a helpful assistant. Helps writing email in Hindi Language.",
+        ),
+        MessagesPlaceholder(variable_name="messages"),
+    ]
+)
+
+# Chain the prompt and chat objects to form a processing pipeline
+chain = prompt | chat
+
+# Invoke the processing chain with specific messages
+response = chain.invoke(
+    {
+        "messages": [
+            HumanMessage(
+                content="Please write email in proper format sender name is Virat Kohli and receipent name is Dhoni, about sad performance of RCB in IPL."
+            )
+        ],
+    }
+)
+
+# Print the result of the chat processing
+print(response.content)
+
