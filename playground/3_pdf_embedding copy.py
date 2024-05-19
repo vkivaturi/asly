@@ -1,3 +1,6 @@
+# Sample code to create embeddings from a pdf file, load to in memory FAISS vector, query it with a prompt
+# and run the prompt + context on LLM
+
 # Importing OpenAI's chat capabilities from langchain_openai
 from langchain_openai import ChatOpenAI  
 # Importing the function to load environment variables

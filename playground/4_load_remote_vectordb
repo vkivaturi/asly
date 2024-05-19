@@ -1,0 +1,43 @@
+# Sample code to create embeddings from a pdf file, load to remote Chromadb and query it with a prompt
+
+# Importing the function to load environment variables
+from dotenv import load_dotenv  
+
+# Importing template and placeholder classes for chat prompts
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings.sentence_transformer import (
+    SentenceTransformerEmbeddings,
+)
+from langchain_chroma import Chroma
+import chromadb
+import os  
+
+print("#Initialise") 
+load_dotenv()
+vectordb_url = os.getenv('VECTOR_URL')  
+chroma_client = chromadb.HttpClient(host=vectordb_url)
+embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+
+print("#Load a pdf doc")
+loader = PyPDFLoader("C:\\Users\\vijay\\Downloads\\2024ITC_RT14.pdf")
+pages = loader.load_and_split()
+
+print("#Split doc and load to remote vector store")
+text_splitter = RecursiveCharacterTextSplitter()
+documents = text_splitter.split_documents(pages)
+
+print("#load it into Chroma")
+db = Chroma(
+    client=chroma_client,
+    collection_name="tg_go_embeddings",
+    embedding_function=embedding_function
+)
+db = Chroma.from_documents(documents, embedding_function)
+
+print("#Query it")
+query = "What is the amount released for infrastructure facilities"
+docs = db.similarity_search(query)
+
+print("#print results")
+print(docs[0].page_content)
